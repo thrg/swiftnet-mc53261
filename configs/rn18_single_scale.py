@@ -15,7 +15,7 @@ from evaluation import StorePreds
 
 from models.util import get_n_params
 
-root = Path('/mnt/sdc1/datasets')       # TODO: Change Path or create symbolic link in datasets
+root = Path('datasets/cityscapes')
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
