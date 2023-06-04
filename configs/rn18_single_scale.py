@@ -15,7 +15,8 @@ from evaluation import StorePreds
 
 from models.util import get_n_params
 
-root = Path('datasets/cityscapes')
+root = Path('../../kaggle/input/cityscapes/cityscapes')
+print(os.listdir(root))
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
@@ -75,7 +76,7 @@ else:
     lr_min = 1e-6
     fine_tune_factor = 4
     weight_decay = 1e-4
-    epochs = 250
+    epochs = 70
 
     optim_params = [
         {'params': model.random_init_params(), 'lr': lr, 'weight_decay': weight_decay},
