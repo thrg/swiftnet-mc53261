@@ -68,7 +68,7 @@ dataset_val = Cityscapes(root, transforms=trans_val, subset='val')
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)
 model = SemsegModel(resnet, num_classes)
 if evaluating:
-    model.load_state_dict(torch.load('/kaggle/output/weights/rn18_single_scale/model_best.pt'))
+    model.load_state_dict(torch.load('/kaggle/output/swiftnet-mc53261/weights/rn18_single_scale/model_best.pt'))
 else:
     model.criterion = SemsegCrossEntropy(num_classes=num_classes, ignore_id=ignore_id)
     lr = 4e-4
