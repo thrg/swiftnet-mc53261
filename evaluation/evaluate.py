@@ -82,7 +82,7 @@ def max_softmax(logits_data):
     print("SOFTMAX!!!")
     softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
     print(softmax_tensor)
-    max_softmax_tensor = torch.max(softmax_tensor, dim=1)
+    max_softmax_tensor = torch.max(softmax_tensor, dim=1).values
     print("MAX!!!")
     print(max_softmax_tensor)
     anomaly_softmax_tensor = (max_softmax_tensor < max_softmax_threshold).float()
