@@ -72,24 +72,17 @@ def mt(sync=False):
 #     return e_x / e_x.sum()
 
 
-max_softmax_border = 0.5
+max_softmax_threshold = 0.5
 
 
 def max_softmax(logits_data):
     # all_softmax = softmax(logits_data)
-    print(logits_data)
-    # usual_pred = torch.argmax(logits_data, dim=1)
-    #
-    # softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
-    # max_softmax_tensor = torch.max(softmax_tensor, dim=1)
-    # anomaly_softmax_tensor = (max_softmax_tensor >= max_softmax_border).float()
-    #
-    # if torch.argmax(logits_data, dim=1).byte().cpu().numpy().astype(np.uint32) == 19:
-    #     return 2
-    # if torch.max(all_softmax) < max_softmax_border:
-    #     return 1
-    # else:
-    #     return 0
+    usual_pred = torch.argmax(logits_data, dim=1)
+
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
+    max_softmax_tensor = torch.max(softmax_tensor, dim=1)
+    anomaly_softmax_tensor = (max_softmax_tensor < max_softmax_threshold).float()
+    anomaly_softmax_tensor = (2.0 if anomaly_softmax_tensor == 0 and usual_pred == 19 else 0.0)
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader_type=None):
@@ -103,9 +96,10 @@ def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             if anomaly_loader_type == "softmax":
-                pred = list(map(max_softmax, torch.unbind(logits.data, 3)))
-                # pred = max_softmax(logits.data)
-                pred = torch.stack(pred, 0)
+                # pred = list(map(max_softmax, torch.unbind(logits.data, 0)))
+                pred = max_softmax(logits.data)
+                print(pred)
+                # pred = torch.stack(pred, 0)
             elif anomaly_loader_type == "logit":
                 pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
             elif anomaly_loader_type == "entropy":
