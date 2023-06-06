@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from time import perf_counter
+import math
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg']
 
@@ -72,21 +73,62 @@ def mt(sync=False):
 #     return e_x / e_x.sum()
 
 
-max_softmax_threshold = 0.5
+def max_softmax(logits_data, threshold):
+    usual_pred = torch.argmax(logits_data, dim=3)
+
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=3)
+    max_tensor = torch.max(softmax_tensor, dim=3).values
+    anomaly_tensor = (max_tensor < threshold).float()
+
+    for i, img in enumerate(usual_pred):
+        for j, row in enumerate(img):
+            for k, pixel in enumerate(row):
+                if pixel == 2 and anomaly_tensor[i][j][k] == 0:
+                    anomaly_tensor[i][j][k] = 2.0
+
+    return anomaly_tensor
 
 
-def max_softmax(logits_data):
-    # all_softmax = softmax(logits_data)
-    usual_pred = torch.argmax(logits_data, dim=1)
+def max_logit(logits_data, threshold):
+    usual_pred = torch.argmax(logits_data, dim=3)
 
-    print("SOFTMAX!!!")
-    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
-    print(softmax_tensor)
-    max_softmax_tensor = torch.max(softmax_tensor, dim=1).values
-    print("MAX!!!")
-    print(max_softmax_tensor)
-    anomaly_softmax_tensor = (max_softmax_tensor < max_softmax_threshold).float()
-    anomaly_softmax_tensor = (2.0 if anomaly_softmax_tensor == 0 and usual_pred == 19 else 0.0)
+    max_tensor = torch.max(logits_data, dim=3).values
+    anomaly_tensor = (max_tensor < threshold).float()
+
+    for i, img in enumerate(usual_pred):
+        for j, row in enumerate(img):
+            for k, pixel in enumerate(row):
+                if pixel == 2 and anomaly_tensor[i][j][k] == 0:
+                    anomaly_tensor[i][j][k] = 2.0
+
+    return anomaly_tensor
+
+
+def entropy(logits_data, threshold):
+    usual_pred = torch.argmax(logits_data, dim=3)
+
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=3)
+    max_data = []
+    for i, img in enumerate(softmax_tensor):
+        max_data.append([])
+        for j, row in enumerate(img):
+            max_data[i].append([])
+            for k, pixel in enumerate(row):
+                entropy = 0
+                for class_chanse in pixel:
+                    entropy -= class_chanse * math.log(class_chanse, 3)
+                max_data[i][j].append(entropy)
+
+    max_tensor = torch.FloatTensor(max_data)
+    anomaly_tensor = (max_tensor > threshold).float()
+
+    for i, img in enumerate(usual_pred):
+        for j, row in enumerate(img):
+            for k, pixel in enumerate(row):
+                if pixel == 2 and anomaly_tensor[i][j][k] == 0:
+                    anomaly_tensor[i][j][k] = 2.0
+
+    return anomaly_tensor
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader_type=None):
@@ -101,13 +143,12 @@ def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             if anomaly_loader_type == "softmax":
                 # pred = list(map(max_softmax, torch.unbind(logits.data, 0)))
-                pred = max_softmax(logits.data)
-                print(pred)
+                pred = max_softmax(logits.data, 0.5).byte().cpu().numpy().astype(np.uint32)
                 # pred = torch.stack(pred, 0)
             elif anomaly_loader_type == "logit":
-                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+                pred = max_logit(logits.data, 0.5).byte().cpu().numpy().astype(np.uint32)
             elif anomaly_loader_type == "entropy":
-                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+                pred = entropy(logits.data, 0.5).byte().cpu().numpy().astype(np.uint32)
             else:
                 pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
             for o in observers:
