@@ -26,11 +26,11 @@ if __name__ == '__main__':
 
     for loader, name in conf.eval_loaders:
         if name == "anomaly":
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers, anomaly_loader_type="softmax")
+            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="softmax")
             print(f'{name}: {iou:.2f}')
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers, anomaly_loader_type="logit")
+            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="logit")
             print(f'{name}: {iou:.2f}')
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers, anomaly_loader_type="entropy")
+            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="entropy")
             print(f'{name}: {iou:.2f}')
         else:
             iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)

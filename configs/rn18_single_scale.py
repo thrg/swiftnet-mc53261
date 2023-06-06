@@ -64,7 +64,9 @@ else:
     )
 
 dataset_train = Cityscapes(root, transforms=trans_train, subset='train')
+print(dataset_train[0].shape)
 dataset_val = Cityscapes(root, transforms=trans_val, subset='val')
+print(dataset_train[0].shape)
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)
 model = SemsegModel(resnet, num_classes)
@@ -106,6 +108,7 @@ if evaluating:
     )
 
     dataset_anomaly = Fishyscapes(anomaly_root, transforms=trans_anomaly, subset='val')
+    print(dataset_anomaly[0].shape)
     loader_anomaly = DataLoader(dataset_anomaly, batch_size=1, collate_fn=custom_collate)
     loader_train = DataLoader(dataset_train, batch_size=1, collate_fn=custom_collate)
 else:
