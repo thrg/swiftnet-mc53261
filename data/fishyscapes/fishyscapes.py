@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset
 from pathlib import Path
 
@@ -40,7 +42,9 @@ class Fishyscapes(Dataset):
     def __init__(self, root: Path, transforms: lambda x: x, subset='val', open_depth=False, labels_dir='gtFine', epoch=None):
         self.root = root
         self.images_dir = self.root / 'leftImg8bit'
+        print(os.listdir(self.images_dir))
         self.labels_dir = self.root / labels_dir
+        print(os.listdir(self.labels_dir))
         self.depth_dir = self.root / 'depth' / subset
         self.subset = subset
         self.has_labels = subset != 'test'
