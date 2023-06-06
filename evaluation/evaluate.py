@@ -74,10 +74,10 @@ def mt(sync=False):
 
 
 def max_softmax(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=3)
+    usual_pred = torch.argmax(logits_data, dim=1)
 
-    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=3)
-    max_tensor = torch.max(softmax_tensor, dim=3).values
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
+    max_tensor = torch.max(softmax_tensor, dim=1).values
     anomaly_tensor = (max_tensor < threshold).float()
 
     for i, img in enumerate(usual_pred):
@@ -90,9 +90,9 @@ def max_softmax(logits_data, threshold):
 
 
 def max_logit(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=3)
+    usual_pred = torch.argmax(logits_data, dim=1)
 
-    max_tensor = torch.max(logits_data, dim=3).values
+    max_tensor = torch.max(logits_data, dim=1).values
     anomaly_tensor = (max_tensor < threshold).float()
 
     for i, img in enumerate(usual_pred):
@@ -105,19 +105,16 @@ def max_logit(logits_data, threshold):
 
 
 def entropy(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=3)
+    usual_pred = torch.argmax(logits_data, dim=1)
 
-    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=3)
-    max_data = []
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
+    max_data = torch.zeros(len(usual_pred), len(usual_pred[0]), len(usual_pred[0][0]))
+
     for i, img in enumerate(softmax_tensor):
-        max_data.append([])
-        for j, row in enumerate(img):
-            max_data[i].append([])
-            for k, pixel in enumerate(row):
-                entropy = 0
-                for class_chanse in pixel:
-                    entropy -= class_chanse * math.log(class_chanse, 3)
-                max_data[i][j].append(entropy)
+        for j, pred_class in enumerate(img):
+            for k, row in enumerate(pred_class):
+                for l, pixel in enumerate(row):
+                    max_data[i][k][l] -= pixel * math.log(pixel, 3)
 
     max_tensor = torch.FloatTensor(max_data)
     anomaly_tensor = (max_tensor > threshold).float()
