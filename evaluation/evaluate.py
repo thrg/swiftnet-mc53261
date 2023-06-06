@@ -103,7 +103,7 @@ def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             if anomaly_loader_type == "softmax":
-                pred = list(map(max_softmax, torch.unbind(logits.data, 0)))
+                pred = list(map(max_softmax, torch.unbind(logits.data, 3)))
                 # pred = max_softmax(logits.data)
                 pred = torch.stack(pred, 0)
             elif anomaly_loader_type == "logit":
