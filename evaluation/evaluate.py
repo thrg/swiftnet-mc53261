@@ -64,7 +64,29 @@ def mt(sync=False):
     return 1000 * perf_counter()
 
 
-def evaluate_semseg(model, data_loader, class_info, observers=()):
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    if isinstance(x, list):
+        x = np.array(x)
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
+
+
+max_softmax_border = 0.5
+
+
+def max_softmax(logits_data):
+    print(logits_data)
+    all_softmax = softmax(logits_data)
+    if torch.argmax(logits_data, dim=1).byte().cpu().numpy().astype(np.uint32) == 19:
+        return 255
+    if torch.max(all_softmax) < max_softmax_border:
+        return 1
+    else:
+        return 0
+
+
+def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader_type=None):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
     with contextlib.ExitStack() as stack:
@@ -74,7 +96,14 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+            if anomaly_loader_type == "softmax":
+                pred = max_softmax(logits.data)
+            elif anomaly_loader_type == "logit":
+                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+            elif anomaly_loader_type == "entropy":
+                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+            else:
+                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
             for o in observers:
                 o(pred, batch, additional)
             calculate_conf_matrix(pred.flatten(), batch["original_labels"].flatten(), conf_mat, model.num_classes)

@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import os
 
+from data.fishyscapes import Fishyscapes
 from models.semseg import SemsegModel
 from models.resnet.resnet_single_scale import *
 from models.loss import SemsegCrossEntropy
@@ -90,6 +91,22 @@ batch_size = 14
 print(f'Batch size: {batch_size}')
 
 if evaluating:
+    anomaly_root = Path('../../kaggle/input/fishyscapes/lostandfound')
+    fish_num_classes = Fishyscapes.num_classes
+    fish_ignore_id = Fishyscapes.num_classes
+    fish_class_info = Fishyscapes.class_info
+    fish_color_info = Fishyscapes.color_info
+    fish_mapping = Fishyscapes.map_to_id
+    trans_anomaly = Compose(
+        [Open(),
+         RemapLabels(fish_mapping, ignore_id=255, ignore_class=fish_ignore_id),
+         SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
+         Tensor(),
+         ]
+    )
+
+    dataset_anomaly = Fishyscapes(anomaly_root, transforms=trans_anomaly, subset='val')
+    loader_anomaly = DataLoader(dataset_anomaly, batch_size=1, collate_fn=custom_collate)
     loader_train = DataLoader(dataset_train, batch_size=1, collate_fn=custom_collate)
 else:
     loader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=4,
@@ -106,7 +123,7 @@ print(f'Num params: {total_params:,} = {ran_params:,}(random init) + {ft_params:
 print(f'SPP params: {spp_params:,}')
 
 if evaluating:
-    eval_loaders = [(loader_val, 'val'), (loader_train, 'train')]
+    eval_loaders = [(loader_anomaly, 'anomaly'), (loader_val, 'val'), (loader_train, 'train')]
     store_dir = f'{dir_path}/out/'
     for d in ['', 'val', 'train', 'training']:
         os.makedirs(store_dir + d, exist_ok=True)
