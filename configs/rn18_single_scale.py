@@ -16,7 +16,6 @@ from evaluation import StorePreds
 from models.util import get_n_params
 
 root = Path('../../kaggle/input/cityscapes/cityscapes')
-print(os.listdir(root))
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
@@ -69,7 +68,7 @@ dataset_val = Cityscapes(root, transforms=trans_val, subset='val')
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)
 model = SemsegModel(resnet, num_classes)
 if evaluating:
-    model.load_state_dict(torch.load('weights/rn18_single_scale/model_best.pt'))
+    model.load_state_dict(torch.load('../weights/rn18_single_scale/model_best.pt'))
 else:
     model.criterion = SemsegCrossEntropy(num_classes=num_classes, ignore_id=ignore_id)
     lr = 4e-4
