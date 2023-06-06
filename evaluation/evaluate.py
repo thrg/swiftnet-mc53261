@@ -96,6 +96,7 @@ def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
+            print(f"LOGITS_DATA: {logits.data}")
             if anomaly_loader_type == "softmax":
                 pred = max_softmax(logits.data)
             elif anomaly_loader_type == "logit":
