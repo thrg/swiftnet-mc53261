@@ -81,6 +81,7 @@ def max_softmax(logits_data):
 
     softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
     max_softmax_tensor = torch.max(softmax_tensor, dim=1)
+    print(max_softmax_tensor)
     anomaly_softmax_tensor = (max_softmax_tensor < max_softmax_threshold).float()
     anomaly_softmax_tensor = (2.0 if anomaly_softmax_tensor == 0 and usual_pred == 19 else 0.0)
 
