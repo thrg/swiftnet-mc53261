@@ -41,7 +41,7 @@ class Fishyscapes(Dataset):
 
     def __init__(self, root: Path, transforms: lambda x: x, subset='val', open_depth=False, labels_dir='gtFine', epoch=None):
         self.root = root
-        self.images_dir = self.root / 'leftImg8bit'
+        self.images_dir = self.root / 'leftimg8bit'
         print(os.listdir(self.images_dir))
         self.labels_dir = self.root / labels_dir
         print(os.listdir(self.labels_dir))
