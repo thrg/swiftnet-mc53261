@@ -5,6 +5,7 @@ import torch
 from tqdm import tqdm
 from time import perf_counter
 from sklearn.metrics import average_precision_score, roc_auc_score
+from IPython.display import FileLink
 import sys
 import numpy
 
@@ -90,6 +91,7 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     f = open("/kaggle/working/data.txt", "w")
     f.writelines([str(gt.tolist()), str(scores.tolist())])
     f.close()
+    FileLink('/kaggle/working/data.txt')
     ap = average_precision_score(gt, scores)
     print(ap)
     auroc = roc_auc_score(gt, scores)
