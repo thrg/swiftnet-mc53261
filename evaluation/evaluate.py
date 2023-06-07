@@ -85,7 +85,6 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
             score = score[gt != 2]
             gt = gt[gt != 2]
             if 0 in gt and 1 in gt:
-                print(gt)
                 ap.append(average_precision_score(gt, score))
                 auroc.append(roc_auc_score(gt, score))
 
