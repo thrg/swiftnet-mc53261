@@ -29,7 +29,6 @@ class RemapLabels:
         self.ignore_class = ignore_class
         for i in range(len(self.mapping)):
             self.mapping[i] = mapping[i] if i in mapping else ignore_id
-            print(self.mapping[i])
 
     def _trans(self, labels):
         if self.ignore_id != self.ignore_class:
