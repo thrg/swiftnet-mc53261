@@ -85,11 +85,10 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     scores = np.array(scores)
     scores = scores[gt != 2]
     gt = gt[gt != 2]
-    numpy.set_printoptions(threshold=sys.maxsize)
     print(gt)
     print(scores)
     f = open("/kaggle/working/data.txt", "w")
-    f.writelines([str(gt), str(scores)])
+    f.writelines([str(gt.tolist()), str(scores.tolist())])
     f.close()
     ap = average_precision_score(gt, scores)
     print(ap)
