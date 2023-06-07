@@ -74,19 +74,17 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
-            original_labels = batch['original_labels']
-            new_labels = original_labels[original_labels != 255]
-            gt.append(new_labels.numpy().astype(np.uint32))
+            gt.append(batch['original_labels'].numpy().astype(np.uint32))
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            score = anomaly_function(logits.data)
-            score = score[original_labels != 255]
-            scores.append(score.cpu().numpy())
+            scores.append(anomaly_function(logits.data).cpu().numpy())
         print('')
     model.train()
     gt = np.array(gt)
     scores = np.array(scores)
     print(gt[0])
     print(scores[0])
+    scores = scores[gt != 255]
+    gt = gt[gt != 255]
     ap = average_precision_score(gt, scores)
     print(ap)
     auroc = roc_auc_score(gt, scores)
