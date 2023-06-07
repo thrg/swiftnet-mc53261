@@ -74,6 +74,7 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
+            print(batch['original_labels'])
             gt.append(batch['original_labels'].numpy().astype(np.uint32))
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             score.append(anomaly_function(logits.data))
