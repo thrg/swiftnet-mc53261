@@ -86,7 +86,7 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     f = open("/kaggle/working/data.txt", "w")
     print(gt)
     print(scores)
-    f.writelines([gt, scores])
+    f.writelines([str(gt), str(scores)])
     f.close()
     ap = average_precision_score(gt, scores)
     print(ap)
