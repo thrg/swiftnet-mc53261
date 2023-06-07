@@ -84,8 +84,9 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
             score = anomaly_function(logits.data).cpu().numpy()
             score = score[gt != 2]
             gt = gt[gt != 2]
-            ap.append(average_precision_score(gt, score))
-            auroc.append(roc_auc_score(gt, score))
+            if 0 in gt and 1 in gt:
+                ap.append(average_precision_score(gt, score))
+                auroc.append(roc_auc_score(gt, score))
 
         print('')
     model.train()
