@@ -5,9 +5,7 @@ import torch
 from tqdm import tqdm
 from time import perf_counter
 from sklearn.metrics import average_precision_score, roc_auc_score
-from IPython.display import FileLink
-import sys
-import numpy
+import math
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg', 'evaluate_anomaly']
 
@@ -68,44 +66,75 @@ def mt(sync=False):
     return 1000 * perf_counter()
 
 
-def evaluate_anomaly(model, data_loader, anomaly_function):
+def max_softmax(logits_data):
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
+    score_tensor = 1 - torch.max(softmax_tensor, dim=1).values
+    return score_tensor
+
+
+def max_logit(logits_data):
+    score_tensor = -torch.max(logits_data, dim=1).values
+    return score_tensor
+
+
+def entropy(logits_data):
+    probs = torch.nn.functional.softmax(logits_data, dim=1)
+    score_tensor = -(probs * torch.log(probs) / math.log(19)).sum(dim=1)
+    return score_tensor
+
+
+def evaluate_anomaly(model, data_loader):
     model.eval()
     managers = [torch.no_grad()]
-    # gt = []
-    # scores = []
-    ap = []
-    auroc = []
+    softmax_ap = []
+    softmax_auroc = []
+    logit_ap = []
+    logit_auroc = []
+    entropy_ap = []
+    entropy_auroc = []
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
             gt = batch['original_labels'].numpy().astype(np.uint32)
+            new_gt = gt[gt != 2]
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            score = anomaly_function(logits.data).cpu().numpy()
+
+            score = max_softmax(logits.data).cpu().numpy()
             score = score[gt != 2]
-            gt = gt[gt != 2]
-            if 0 in gt and 1 in gt:
-                ap.append(average_precision_score(gt, score))
-                auroc.append(roc_auc_score(gt, score))
+            if 0 in new_gt and 1 in new_gt:
+                softmax_ap.append(average_precision_score(new_gt, score))
+                softmax_auroc.append(roc_auc_score(new_gt, score))
+
+            score = max_logit(logits.data).cpu().numpy()
+            score = score[gt != 2]
+            if 0 in new_gt and 1 in new_gt:
+                logit_ap.append(average_precision_score(new_gt, score))
+                logit_auroc.append(roc_auc_score(new_gt, score))
+
+            score = entropy(logits.data).cpu().numpy()
+            score = score[gt != 2]
+            if 0 in new_gt and 1 in new_gt:
+                entropy_ap.append(average_precision_score(new_gt, score))
+                entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
     model.train()
-    # gt = np.array(gt)
-    # scores = np.array(scores)
-    # scores = scores[gt != 2]
-    # gt = gt[gt != 2]
-    # print(gt)
-    # print(scores)
-    # f = open("/kaggle/working/data.txt", "w")
-    # f.writelines([str(gt.tolist()), str(scores.tolist())])
-    # f.close()
-    # print("AAAAAAAAAAAAAAAAAAAA")
-    # FileLink('/kaggle/working/data.txt')
-    ap = np.array(ap)
-    auroc = np.array(auroc)
-    print(np.mean(ap))
-    print(np.mean(auroc))
-    return ap, auroc
+    softmax_ap = np.array(softmax_ap)
+    softmax_auroc = np.array(softmax_auroc)
+    logit_ap = np.array(logit_ap)
+    logit_auroc = np.array(logit_auroc)
+    entropy_ap = np.array(entropy_ap)
+    entropy_auroc = np.array(entropy_auroc)
+
+    softmax_mean_ap = np.mean(softmax_ap)
+    softmax_mean_auroc = np.mean(softmax_auroc)
+    logit_mean_ap = np.mean(logit_ap)
+    logit_mean_auroc = np.mean(logit_auroc)
+    entropy_mean_ap = np.mean(entropy_ap)
+    entropy_mean_auroc = np.mean(entropy_auroc)
+
+    return softmax_mean_ap, softmax_mean_auroc, logit_mean_ap, logit_mean_auroc, entropy_mean_ap, entropy_mean_auroc
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=()):

@@ -13,23 +13,6 @@ def import_module(path):
     return module
 
 
-def max_softmax(logits_data):
-    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
-    score_tensor = 1 - torch.max(softmax_tensor, dim=1).values
-    return score_tensor
-
-
-def max_logit(logits_data):
-    score_tensor = -torch.max(logits_data, dim=1).values
-    return score_tensor
-
-
-def entropy(logits_data):
-    probs = torch.nn.functional.softmax(logits_data, dim=1)
-    score_tensor = -(probs * torch.log(probs) / math.log(19)).sum(dim=1)
-    return score_tensor
-
-
 parser = argparse.ArgumentParser(description='Detector train')
 parser.add_argument('config', type=str, help='Path to configuration .py file')
 parser.add_argument('--profile', dest='profile', action='store_true', help='Profile one forward pass')
@@ -45,9 +28,7 @@ if __name__ == '__main__':
 
     for loader, name in conf.eval_loaders:
         if name == "anomaly":
-            softmax_ap, softmax_auroc = evaluate_anomaly(model, loader, max_softmax)
-            logit_ap, logit_auroc = evaluate_anomaly(model, loader, max_logit)
-            entropy_ap, entropy_auroc = evaluate_anomaly(model, loader, entropy)
+            softmax_ap, softmax_auroc, logit_ap, logit_auroc, entropy_ap, entropy_auroc = evaluate_anomaly(model, loader)
             print('softmax: ')
             print(f'ap: ', end="")
             print(softmax_ap)
