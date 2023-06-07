@@ -83,8 +83,8 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     scores = np.array(scores)
     print(gt[0])
     print(scores[0])
-    scores = scores[gt != 255]
-    gt = gt[gt != 255]
+    scores = scores[gt != 2]
+    gt = gt[gt != 2]
     # ap = average_precision_score(gt, scores)
     # print(ap)
     auroc = roc_auc_score(gt, scores)
