@@ -108,8 +108,8 @@ Label = namedtuple( 'Label' , [
 labels = [
     #       name                     id      trainId     category       categoryId     hasInstances   ignoreInEval   color
     Label(  'unlabeled'            ,  255 ,     255     , "undef"      , 0            , False        , True         , (  255,  255,  255) ),
-    Label(  'anomaly'              ,  1 ,       1       , "undef"      , 0            , False        , False        , (  0,  0,  0) ),
     Label(  'class'                ,  0 ,       0       , "undef"      , 0            , True         , False        , (  0,  0, 0) ),
+    Label(  'anomaly'              ,  1 ,       1       , "undef"      , 0            , False        , False        , (  0,  0,  0) ),
 ]
 
 
