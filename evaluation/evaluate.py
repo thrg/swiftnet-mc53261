@@ -71,33 +71,40 @@ def mt(sync=False):
 def evaluate_anomaly(model, data_loader, anomaly_function):
     model.eval()
     managers = [torch.no_grad()]
-    gt = []
-    scores = []
+    # gt = []
+    # scores = []
+    ap = []
+    auroc = []
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
-            gt.append(batch['original_labels'].numpy().astype(np.uint32))
+            gt = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            scores.append(anomaly_function(logits.data).cpu().numpy())
+            score = anomaly_function(logits.data).cpu().numpy()
+            score = score[gt != 2]
+            gt = gt[gt != 2]
+            ap.append(average_precision_score(gt, score))
+            auroc.append(roc_auc_score(gt, score))
+
         print('')
     model.train()
-    gt = np.array(gt)
-    scores = np.array(scores)
-    scores = scores[gt != 2]
-    gt = gt[gt != 2]
-    print(gt)
-    print(scores)
-    f = open("/kaggle/working/data.txt", "w")
-    f.writelines([str(gt.tolist()), str(scores.tolist())])
-    f.close()
-    print("AAAAAAAAAAAAAAAAAAAA")
-    FileLink('/kaggle/working/data.txt')
-    ap = average_precision_score(gt, scores)
-    print(ap)
-    auroc = roc_auc_score(gt, scores)
-    print(auroc)
-    return 0, auroc
+    # gt = np.array(gt)
+    # scores = np.array(scores)
+    # scores = scores[gt != 2]
+    # gt = gt[gt != 2]
+    # print(gt)
+    # print(scores)
+    # f = open("/kaggle/working/data.txt", "w")
+    # f.writelines([str(gt.tolist()), str(scores.tolist())])
+    # f.close()
+    # print("AAAAAAAAAAAAAAAAAAAA")
+    # FileLink('/kaggle/working/data.txt')
+    ap = np.array(ap)
+    auroc = np.array(auroc)
+    print(np.mean(ap))
+    print(np.mean(auroc))
+    return ap, auroc
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=()):
