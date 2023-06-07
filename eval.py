@@ -45,15 +45,15 @@ if __name__ == '__main__':
 
     for loader, name in conf.eval_loaders:
         if name == "anomaly":
-            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=max_softmax)
+            ap, auroc = evaluate_anomaly(model, loader, class_info, max_softmax)
             print('softmax: ')
             print(f'ap: {ap:.2f}')
             print(f'auroc: {auroc:.2f}')
-            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=max_logit)
+            ap, auroc = evaluate_anomaly(model, loader, class_info, max_logit)
             print('softmax: ')
             print(f'ap: {ap:.2f}')
             print(f'auroc: {auroc:.2f}')
-            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=entropy)
+            ap, auroc = evaluate_anomaly(model, loader, class_info, entropy)
             print('softmax: ')
             print(f'ap: {ap:.2f}')
             print(f'auroc: {auroc:.2f}')

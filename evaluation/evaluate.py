@@ -65,7 +65,7 @@ def mt(sync=False):
     return 1000 * perf_counter()
 
 
-def evaluate_anomaly(model, data_loader, anomaly_function=None):
+def evaluate_anomaly(model, data_loader, anomaly_function):
     model.eval()
     managers = [torch.no_grad()]
     gt = []
