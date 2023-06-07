@@ -69,25 +69,29 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     model.eval()
     managers = [torch.no_grad()]
     gt = []
-    score = []
+    scores = []
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
-            gt.append(batch['original_labels'].numpy().astype(np.uint32))
+            original_labels = batch['original_labels']
+            original_labels = original_labels[original_labels != 255]
+            gt.append(original_labels.numpy().astype(np.uint32))
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            score.append(anomaly_function(logits.data).cpu().numpy())
+            score = anomaly_function(logits.data)
+            score = score[original_labels != 255]
+            scores.append(score.cpu().numpy())
         print('')
     model.train()
     gt = np.array(gt)
-    score = np.array(score)
+    score = np.array(scores)
     print(gt[0])
     print(score[0])
-    # ap = average_precision_score(gt[gt != 255], score[gt != 255])
-    # print(ap)
-    auroc = roc_auc_score(gt[gt != 255], score[gt != 255])
+    ap = average_precision_score(gt[gt != 255], score[gt != 255])
+    print(ap)
+    auroc = roc_auc_score(gt, score[gt != 255])
     print(auroc)
-    return 0, auroc
+    return ap, auroc
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=()):
