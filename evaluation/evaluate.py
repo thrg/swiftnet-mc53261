@@ -85,9 +85,9 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     scores = np.array(scores)
     scores = scores[gt != 2]
     gt = gt[gt != 2]
+    numpy.set_printoptions(threshold=sys.maxsize)
     print(gt)
     print(scores)
-    numpy.set_printoptions(threshold=sys.maxsize)
     f = open("/kaggle/working/data.txt", "w")
     f.writelines([str(gt), str(scores)])
     f.close()
