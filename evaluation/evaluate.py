@@ -85,11 +85,11 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     print(scores[0])
     scores = scores[gt != 255]
     gt = gt[gt != 255]
-    ap = average_precision_score(gt, scores)
-    print(ap)
+    # ap = average_precision_score(gt, scores)
+    # print(ap)
     auroc = roc_auc_score(gt, scores)
     print(auroc)
-    return ap, auroc
+    return 0, auroc
 
 
 def evaluate_semseg(model, data_loader, class_info, observers=()):
