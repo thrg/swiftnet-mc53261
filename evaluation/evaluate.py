@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from time import perf_counter
-from sklearn.metrics import average_percision_score, roc_auc_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg']
 
