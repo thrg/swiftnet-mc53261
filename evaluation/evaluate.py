@@ -76,7 +76,7 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
             gt.append(batch['original_labels'].numpy().astype(np.uint32))
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
-            score.append(anomaly_function(logits.data).numpy())
+            score.append(anomaly_function(logits.data).cpu().numpy())
         print('')
     model.train()
     gt = np.array(gt)
