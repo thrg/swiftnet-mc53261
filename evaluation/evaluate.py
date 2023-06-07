@@ -84,12 +84,12 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
         print('')
     model.train()
     gt = np.array(gt)
-    score = np.array(scores)
+    scores = np.array(scores)
     print(gt[0])
-    print(score[0])
-    ap = average_precision_score(gt, score)
+    print(scores[0])
+    ap = average_precision_score(gt, scores)
     print(ap)
-    auroc = roc_auc_score(gt, score)
+    auroc = roc_auc_score(gt, scores)
     print(auroc)
     return ap, auroc
 
