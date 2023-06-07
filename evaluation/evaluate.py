@@ -5,6 +5,8 @@ import torch
 from tqdm import tqdm
 from time import perf_counter
 from sklearn.metrics import average_precision_score, roc_auc_score
+import sys
+import numpy
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg', 'evaluate_anomaly']
 
@@ -83,10 +85,11 @@ def evaluate_anomaly(model, data_loader, anomaly_function):
     scores = np.array(scores)
     scores = scores[gt != 2]
     gt = gt[gt != 2]
-    f = open("/kaggle/working/data.txt", "w")
     print(gt)
     print(scores)
-    f.writelines([str(" ".join(gt)), str(" ".join(scores))])
+    numpy.set_printoptions(threshold=sys.maxsize)
+    f = open("/kaggle/working/data.txt", "w")
+    f.writelines([str(gt), str(scores)])
     f.close()
     ap = average_precision_score(gt, scores)
     print(ap)
