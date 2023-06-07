@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from time import perf_counter
-import math
+from sklearn.metrics import average_percision_score, roc_auc_score
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg']
 
@@ -65,42 +65,26 @@ def mt(sync=False):
     return 1000 * perf_counter()
 
 
-def max_softmax(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=1)
-
-    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
-    max_tensor = torch.max(softmax_tensor, dim=1).values
-    anomaly_tensor = (max_tensor < threshold).float()
-    anomaly_tensor[usual_pred == 2] = 2.0
-
-    return anomaly_tensor
-
-
-def max_logit(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=1)
-
-    max_tensor = torch.max(logits_data, dim=1).values
-    anomaly_tensor = (max_tensor < threshold).float()
-    anomaly_tensor[usual_pred == 2] = 2.0
-
-    return anomaly_tensor
+def evaluate_anomaly(model, data_loader, anomaly_function=None):
+    model.eval()
+    managers = [torch.no_grad()]
+    gt = []
+    score = []
+    with contextlib.ExitStack() as stack:
+        for ctx_mgr in managers:
+            stack.enter_context(ctx_mgr)
+        for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
+            gt.append(batch['original_labels'].numpy().astype(np.uint32))
+            logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
+            score.append(anomaly_function(logits.data))
+        print('')
+    model.train()
+    ap = average_percision_score(gt[gt != 2], score[gt != 2])
+    auroc = roc_auc_score(gt[gt != 2], score[gt != 2])
+    return ap, auroc
 
 
-def entropy(logits_data, threshold):
-    usual_pred = torch.argmax(logits_data, dim=1)
-
-    probs = torch.nn.functional.softmax(logits_data, dim=1)
-    max_tensor = -(probs * torch.log(probs) / math.log(3)).sum(dim=1)
-
-    anomaly_tensor = (max_tensor > threshold).float()
-
-    anomaly_tensor[usual_pred == 2] = 2.0
-
-    return anomaly_tensor
-
-
-
-def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader_type=None):
+def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
     with contextlib.ExitStack() as stack:
@@ -111,19 +95,6 @@ def evaluate_semseg(model, data_loader, class_info, observers=(), anomaly_loader
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
-            print(logits.data.shape)
-            print(pred.shape)
-            if anomaly_loader_type == "softmax":
-                # pred = list(map(max_softmax, torch.unbind(logits.data, 0)))
-                pred = max_softmax(logits.data, 0.5).byte().cpu().numpy().astype(np.uint32)
-                print(pred.shape)
-                # pred = torch.stack(pred, 0)
-            elif anomaly_loader_type == "logit":
-                pred = max_logit(logits.data, 3).byte().cpu().numpy().astype(np.uint32)
-            elif anomaly_loader_type == "entropy":
-                pred = entropy(logits.data, 0.8).byte().cpu().numpy().astype(np.uint32)
-            else:
-                pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
             for o in observers:
                 o(pred, batch, additional)
             calculate_conf_matrix(pred.flatten(), batch["original_labels"].flatten(), conf_mat, model.num_classes)

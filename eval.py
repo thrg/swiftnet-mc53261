@@ -1,7 +1,9 @@
 import argparse
 from pathlib import Path
 import importlib.util
-from evaluation import evaluate_semseg
+from evaluation import evaluate_semseg, evaluate_anomaly
+import torch
+import math
 
 
 def import_module(path):
@@ -9,6 +11,23 @@ def import_module(path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def max_softmax(logits_data):
+    softmax_tensor = torch.nn.functional.softmax(logits_data, dim=1)
+    score_tensor = 1 - torch.max(softmax_tensor, dim=1).values
+    return score_tensor
+
+
+def max_logit(logits_data):
+    score_tensor = -torch.max(logits_data, dim=1).values
+    return score_tensor
+
+
+def entropy(logits_data):
+    probs = torch.nn.functional.softmax(logits_data, dim=1)
+    score_tensor = -(probs * torch.log(probs) / math.log(19)).sum(dim=1)
+    return score_tensor
 
 
 parser = argparse.ArgumentParser(description='Detector train')
@@ -26,12 +45,18 @@ if __name__ == '__main__':
 
     for loader, name in conf.eval_loaders:
         if name == "anomaly":
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="softmax")
-            print(f'{name}: {iou:.2f}')
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="logit")
-            print(f'{name}: {iou:.2f}')
-            iou, per_class_iou = evaluate_semseg(model, loader, class_info, anomaly_loader_type="entropy")
-            print(f'{name}: {iou:.2f}')
+            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=max_softmax)
+            print('softmax: ')
+            print(f'ap: {ap:.2f}')
+            print(f'auroc: {auroc:.2f}')
+            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=max_logit)
+            print('softmax: ')
+            print(f'ap: {ap:.2f}')
+            print(f'auroc: {auroc:.2f}')
+            ap, auroc = evaluate_anomaly(model, loader, class_info, anomaly_function=entropy)
+            print('softmax: ')
+            print(f'ap: {ap:.2f}')
+            print(f'auroc: {auroc:.2f}')
         else:
             iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)
             print(f'{name}: {iou:.2f}')
