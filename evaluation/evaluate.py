@@ -6,7 +6,7 @@ from tqdm import tqdm
 from time import perf_counter
 from sklearn.metrics import average_precision_score, roc_auc_score
 
-__all__ = ['compute_errors', 'get_pred', 'evaluate_semseg']
+__all__ = ['compute_errors', 'get_pred', 'evaluate_semseg', 'evaluate_anomaly']
 
 
 def compute_errors(conf_mat, class_info, verbose=True):
