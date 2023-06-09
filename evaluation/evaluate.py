@@ -4,8 +4,9 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from time import perf_counter
-from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.metrics import average_precision_score, roc_auc_score, RocCurveDisplay, PrecisionRecallDisplay
 import math
+import matplotlib.pyplot as plt
 
 __all__ = ['compute_errors', 'get_pred', 'evaluate_semseg', 'evaluate_anomaly']
 
@@ -104,18 +105,36 @@ def evaluate_anomaly(model, data_loader):
             score = score[gt != 2]
             if 0 in new_gt and 1 in new_gt:
                 softmax_ap.append(average_precision_score(new_gt, score))
+                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+                roc_display.plot()
+                plt.show()
+                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+                ap_display.plot()
+                plt.show()
                 softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[gt != 2]
             if 0 in new_gt and 1 in new_gt:
                 logit_ap.append(average_precision_score(new_gt, score))
+                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+                roc_display.plot()
+                plt.show()
+                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+                ap_display.plot()
+                plt.show()
                 logit_auroc.append(roc_auc_score(new_gt, score))
 
             score = entropy(logits.data).cpu().numpy()
             score = score[gt != 2]
             if 0 in new_gt and 1 in new_gt:
                 entropy_ap.append(average_precision_score(new_gt, score))
+                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+                roc_display.plot()
+                plt.show()
+                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+                ap_display.plot()
+                plt.show()
                 entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
