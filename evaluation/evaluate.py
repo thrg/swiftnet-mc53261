@@ -111,6 +111,8 @@ def evaluate_anomaly(model, data_loader):
                 ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
                 ap_display.plot()
                 plt.savefig(f"images/ap_softmax_{step}")
+                plt.hist(score)
+                plt.savefig(f"images/hist_softmax_{step}")
                 softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
@@ -123,6 +125,8 @@ def evaluate_anomaly(model, data_loader):
                 ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
                 ap_display.plot()
                 plt.savefig(f"images/ap_logit_{step}")
+                plt.hist(score)
+                plt.savefig(f"images/hist_logit_{step}")
                 logit_auroc.append(roc_auc_score(new_gt, score))
 
             score = entropy(logits.data).cpu().numpy()
@@ -135,6 +139,8 @@ def evaluate_anomaly(model, data_loader):
                 ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
                 ap_display.plot()
                 plt.savefig(f"images/ap_entropy_{step}")
+                plt.hist(score)
+                plt.savefig(f"images/hist_entropy_{step}")
                 entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
