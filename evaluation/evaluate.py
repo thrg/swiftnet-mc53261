@@ -158,11 +158,11 @@ def evaluate_anomaly(model, data_loader):
     # logit_scores = np.array(logit_scores)
     # entropy_scores = np.array(entropy_scores)
 
-    plt.hist(softmax_scores)
-    plt.xlabel('Vrijednost anomalije piksela')
-    plt.ylabel('Broj piksela')
-    plt.savefig(f"images/hist_softmax_anomaly")
-    plt.close()
+    # plt.hist(softmax_scores)
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_softmax_anomaly")
+    # plt.close()
 
     # plt.hist(logit_scores)
     # plt.xlabel('Vrijednost anomalije piksela')
