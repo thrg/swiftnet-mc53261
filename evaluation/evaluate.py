@@ -109,8 +109,8 @@ def evaluate_anomaly(model, data_loader):
             score = max_softmax(logits.data).cpu().numpy()
             score = score[gt != 2]
             softmax_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                softmax_ap.append(average_precision_score(new_gt, score))
+            # if 0 in new_gt and 1 in new_gt:
+                # softmax_ap.append(average_precision_score(new_gt, score))
             #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
             #     roc_display.plot()
             #     plt.savefig(f"images/auroc_softmax_{step}")
@@ -119,13 +119,13 @@ def evaluate_anomaly(model, data_loader):
             #     ap_display.plot()
             #     plt.savefig(f"images/ap_softmax_{step}")
             #     plt.close()
-                softmax_auroc.append(roc_auc_score(new_gt, score))
+            #     softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[gt != 2]
             logit_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                logit_ap.append(average_precision_score(new_gt, score))
+            # if 0 in new_gt and 1 in new_gt:
+                # logit_ap.append(average_precision_score(new_gt, score))
             #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
             #     roc_display.plot()
             #     plt.savefig(f"images/auroc_logit_{step}")
@@ -134,13 +134,13 @@ def evaluate_anomaly(model, data_loader):
             #     ap_display.plot()
             #     plt.savefig(f"images/ap_logit_{step}")
             #     plt.close()
-                logit_auroc.append(roc_auc_score(new_gt, score))
+            #     logit_auroc.append(roc_auc_score(new_gt, score))
 
             score = entropy(logits.data).cpu().numpy()
             score = score[gt != 2]
             entropy_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                entropy_ap.append(average_precision_score(new_gt, score))
+            # if 0 in new_gt and 1 in new_gt:
+                # entropy_ap.append(average_precision_score(new_gt, score))
             #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
             #     roc_display.plot()
             #     plt.savefig(f"images/auroc_entropy_{step}")
@@ -149,7 +149,7 @@ def evaluate_anomaly(model, data_loader):
             #     ap_display.plot()
             #     plt.savefig(f"images/ap_entropy_{step}")
             #     plt.close()
-                entropy_auroc.append(roc_auc_score(new_gt, score))
+            #     entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
     model.train()
