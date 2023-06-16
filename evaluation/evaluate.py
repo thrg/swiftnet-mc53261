@@ -107,7 +107,7 @@ def evaluate_anomaly(model, data_loader):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[gt != 2]
-            softmax_score.append(score, 0)
+            np.hstack([softmax_score, score])
             if 0 in new_gt and 1 in new_gt:
                 softmax_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -122,7 +122,7 @@ def evaluate_anomaly(model, data_loader):
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[gt != 2]
-            logit_score.append(score, 0)
+            np.hstack([logit_score, score])
             if 0 in new_gt and 1 in new_gt:
                 logit_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -137,7 +137,7 @@ def evaluate_anomaly(model, data_loader):
 
             score = entropy(logits.data).cpu().numpy()
             score = score[gt != 2]
-            entropy_score.append(score, 0)
+            np.hstack([entropy_score, score])
             if 0 in new_gt and 1 in new_gt:
                 entropy_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -207,15 +207,15 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            softmax_score.append(score, 0)
+            np.hstack([softmax_score, score])
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            logit_score.append(score, 0)
+            np.hstack([logit_score, score])
 
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            entropy_score.append(score, 0)
+            np.hstack([entropy_score, score])
 
             for o in observers:
                 o(pred, batch, additional)
