@@ -93,6 +93,10 @@ def evaluate_anomaly(model, data_loader):
     logit_auroc = []
     entropy_ap = []
     entropy_auroc = []
+    softmax_score = np.array([])
+    logit_score = np.array([])
+    entropy_score = np.array([])
+
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
@@ -103,6 +107,7 @@ def evaluate_anomaly(model, data_loader):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[gt != 2]
+            softmax_score.append(score, 0)
             if 0 in new_gt and 1 in new_gt:
                 softmax_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -113,15 +118,11 @@ def evaluate_anomaly(model, data_loader):
                 ap_display.plot()
                 plt.savefig(f"images/ap_softmax_{step}")
                 plt.close()
-                plt.hist(score)
-                plt.xlabel('Vrijednost anomalije piksela')
-                plt.ylabel('Broj piksela')
-                plt.savefig(f"images/hist_softmax_{step}")
-                plt.close()
                 softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[gt != 2]
+            logit_score.append(score, 0)
             if 0 in new_gt and 1 in new_gt:
                 logit_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -132,15 +133,11 @@ def evaluate_anomaly(model, data_loader):
                 ap_display.plot()
                 plt.savefig(f"images/ap_logit_{step}")
                 plt.close()
-                plt.hist(score)
-                plt.xlabel('Vrijednost anomalije piksela')
-                plt.ylabel('Broj piksela')
-                plt.savefig(f"images/hist_logit_{step}")
-                plt.close()
                 logit_auroc.append(roc_auc_score(new_gt, score))
 
             score = entropy(logits.data).cpu().numpy()
             score = score[gt != 2]
+            entropy_score.append(score, 0)
             if 0 in new_gt and 1 in new_gt:
                 entropy_ap.append(average_precision_score(new_gt, score))
                 roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -151,15 +148,29 @@ def evaluate_anomaly(model, data_loader):
                 ap_display.plot()
                 plt.savefig(f"images/ap_entropy_{step}")
                 plt.close()
-                plt.hist(score)
-                plt.xlabel('Vrijednost anomalije piksela')
-                plt.ylabel('Broj piksela')
-                plt.savefig(f"images/hist_entropy_{step}")
-                plt.close()
                 entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
     model.train()
+
+    plt.hist(softmax_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_softmax_anomaly")
+    plt.close()
+
+    plt.hist(logit_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_logit_anomaly")
+    plt.close()
+
+    plt.hist(entropy_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_entropy_anomaly")
+    plt.close()
+
     softmax_ap = np.array(softmax_ap)
     softmax_auroc = np.array(softmax_auroc)
     logit_ap = np.array(logit_ap)
@@ -180,6 +191,11 @@ def evaluate_anomaly(model, data_loader):
 def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
+
+    softmax_score = np.array([])
+    logit_score = np.array([])
+    entropy_score = np.array([])
+
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
@@ -188,12 +204,44 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+
+            score = max_softmax(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            softmax_score.append(score, 0)
+
+            score = max_logit(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            logit_score.append(score, 0)
+
+            score = entropy(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            entropy_score.append(score, 0)
+
             for o in observers:
                 o(pred, batch, additional)
             calculate_conf_matrix(pred.flatten(), batch["original_labels"].flatten(), conf_mat, model.num_classes)
         print('')
         pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
     model.train()
+
+    plt.hist(softmax_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_softmax_normal")
+    plt.close()
+
+    plt.hist(logit_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_logit_normal")
+    plt.close()
+
+    plt.hist(entropy_score)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_entropy_normal")
+    plt.close()
+
     return iou_acc, per_class_iou
 
 
