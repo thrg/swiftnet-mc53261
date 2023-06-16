@@ -45,6 +45,7 @@ if __name__ == '__main__':
         #     print(f'auroc: ', end="")
         #     print(entropy_auroc)
         # else:
-        iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)
-        print(f'{name}: {iou:.2f}')
-        break
+        if name != "anomaly":
+            iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)
+            print(f'{name}: {iou:.2f}')
+            break
