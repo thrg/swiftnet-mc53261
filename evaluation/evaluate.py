@@ -94,8 +94,8 @@ def evaluate_anomaly(model, data_loader):
     entropy_ap = []
     entropy_auroc = []
 
-    softmax_scores = []
-    # logit_scores = []
+    # softmax_scores = []
+    logit_scores = []
     # entropy_scores = []
 
     with contextlib.ExitStack() as stack:
@@ -106,9 +106,9 @@ def evaluate_anomaly(model, data_loader):
             new_gt = gt[gt != 2]
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
 
-            score = max_softmax(logits.data).cpu().numpy()
-            score = score[gt != 2]
-            softmax_scores.extend(score.tolist())
+            # score = max_softmax(logits.data).cpu().numpy()
+            # score = score[gt != 2]
+            # softmax_scores.extend(score.tolist())
             # if 0 in new_gt and 1 in new_gt:
                 # softmax_ap.append(average_precision_score(new_gt, score))
             #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -121,9 +121,9 @@ def evaluate_anomaly(model, data_loader):
             #     plt.close()
             #     softmax_auroc.append(roc_auc_score(new_gt, score))
 
-            # score = max_logit(logits.data).cpu().numpy()
-            # score = score[gt != 2]
-            # logit_scores.extend(score.tolist())
+            score = max_logit(logits.data).cpu().numpy()
+            score = score[gt != 2]
+            logit_scores.extend(score.tolist())
             # if 0 in new_gt and 1 in new_gt:
                 # logit_ap.append(average_precision_score(new_gt, score))
             #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
@@ -154,22 +154,22 @@ def evaluate_anomaly(model, data_loader):
         print('')
     model.train()
 
-    softmax_scores = np.array(softmax_scores)
-    # logit_scores = np.array(logit_scores)
+    # softmax_scores = np.array(softmax_scores)
+    logit_scores = np.array(logit_scores)
     # entropy_scores = np.array(entropy_scores)
 
-    plt.hist(softmax_scores)
-    plt.xlabel('Vrijednost anomalije piksela')
-    plt.ylabel('Broj piksela')
-    plt.savefig(f"images/hist_softmax_anomaly")
-    plt.close()
-
-    # plt.hist(logit_scores)
+    # plt.hist(softmax_scores)
     # plt.xlabel('Vrijednost anomalije piksela')
     # plt.ylabel('Broj piksela')
-    # plt.savefig(f"images/hist_logit_anomaly")
+    # plt.savefig(f"images/hist_softmax_anomaly")
     # plt.close()
-    #
+
+    plt.hist(logit_scores)
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_logit_anomaly")
+    plt.close()
+
     # plt.hist(entropy_scores)
     # plt.xlabel('Vrijednost anomalije piksela')
     # plt.ylabel('Broj piksela')
