@@ -201,6 +201,9 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     # logit_scores = []
     # entropy_scores = []
 
+    bins = np.linspace(0, 1, 200)
+    OD_h_total = np.zeros((1, 199))
+
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
             stack.enter_context(ctx_mgr)
@@ -212,7 +215,9 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            softmax_scores.extend(score.tolist())
+
+            OD_h, _ = np.histogram(score, bins)
+            OD_h_total += OD_h
 
             # score = max_logit(logits.data).cpu().numpy()
             # score = score[batch['original_labels'] != 2]
@@ -229,11 +234,10 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
         # pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
     model.train()
 
-    softmax_scores = np.array(softmax_scores)
     # logit_scores = np.array(logit_scores)
     # entropy_scores = np.array(entropy_scores)
 
-    plt.hist(softmax_scores)
+    plt.plot(bins[1:], OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_softmax_normal")
