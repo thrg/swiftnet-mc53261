@@ -197,12 +197,10 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
 
-    softmax_scores = []
-    # logit_scores = []
-    # entropy_scores = []
-
     bins = np.linspace(0, 1, 20)
-    OD_h_total = np.zeros((1, 19))
+    s_OD_h_total = np.zeros((1, 19))
+    l_OD_h_total = np.zeros((1, 19))
+    e_OD_h_total = np.zeros((1, 19))
 
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
@@ -215,17 +213,18 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-
             OD_h, _ = np.histogram(score, bins)
-            OD_h_total += OD_h
+            s_OD_h_total += OD_h
 
-            # score = max_logit(logits.data).cpu().numpy()
-            # score = score[batch['original_labels'] != 2]
-            # logit_scores.extend(score.tolist())
-            #
-            # score = entropy(logits.data).cpu().numpy()
-            # score = score[batch['original_labels'] != 2]
-            # entropy_scores.extend(score.tolist())
+            score = max_logit(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            OD_h, _ = np.histogram(score, bins)
+            l_OD_h_total += OD_h
+
+            score = entropy(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            OD_h, _ = np.histogram(score, bins)
+            e_OD_h_total += OD_h
 
             # for o in observers:
             #     o(pred, batch, additional)
@@ -237,23 +236,23 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     # logit_scores = np.array(logit_scores)
     # entropy_scores = np.array(entropy_scores)
 
-    plt.plot(bins[1:], OD_h_total[0])
+    plt.plot(bins[1:], s_OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_softmax_normal")
     plt.close()
 
-    # plt.hist(logit_scores)
-    # plt.xlabel('Vrijednost anomalije piksela')
-    # plt.ylabel('Broj piksela')
-    # plt.savefig(f"images/hist_logit_normal")
-    # plt.close()
-    #
-    # plt.hist(entropy_scores)
-    # plt.xlabel('Vrijednost anomalije piksela')
-    # plt.ylabel('Broj piksela')
-    # plt.savefig(f"images/hist_entropy_normal")
-    # plt.close()
+    plt.plot(bins[1:], l_OD_h_total[0])
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_logit_normal")
+    plt.close()
+
+    plt.plot(bins[1:], e_OD_h_total[0])
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_entropy_normal")
+    plt.close()
 
     # return iou_acc, per_class_iou
     return 0, 0
