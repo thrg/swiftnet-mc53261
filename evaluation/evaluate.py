@@ -201,8 +201,8 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     # logit_scores = []
     # entropy_scores = []
 
-    bins = np.linspace(0, 1, 200)
-    OD_h_total = np.zeros((1, 199))
+    bins = np.linspace(0, 1, 20)
+    OD_h_total = np.zeros((1, 19))
 
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
