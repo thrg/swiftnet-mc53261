@@ -217,17 +217,17 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
 
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, bins=bins)
+            OD_h, _ = np.histogram(score, bins)
             s_OD_h_total += OD_h
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, bins=bins)
+            OD_h, _ = np.histogram(score, bins)
             l_OD_h_total += OD_h
 
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, bins=logit_bins)
+            OD_h, _ = np.histogram(score, logit_bins)
             e_OD_h_total += OD_h
 
             for o in observers:
