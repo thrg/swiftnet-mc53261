@@ -198,9 +198,12 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     managers = [torch.no_grad()] + list(observers)
 
     # bins = np.linspace(0, 1, 20)
-    s_OD_h_total = np.zeros((1, 19))
-    l_OD_h_total = np.zeros((1, 19))
-    e_OD_h_total = np.zeros((1, 19))
+    # s_OD_h_total = np.zeros((1, 19))
+    # l_OD_h_total = np.zeros((1, 19))
+    # e_OD_h_total = np.zeros((1, 19))
+    s_OD_h_total = np.zeros(20)
+    l_OD_h_total = np.zeros(20)
+    e_OD_h_total = np.zeros(20)
 
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
