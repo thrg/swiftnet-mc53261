@@ -233,16 +233,19 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
             OD_h, _ = np.histogram(score, 20)
+            print(OD_h)
             s_OD_h_total += OD_h
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
             OD_h, _ = np.histogram(score, 20)
+            print(OD_h)
             l_OD_h_total += OD_h
 
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
             OD_h, _ = np.histogram(score, 20)
+            print(OD_h)
             e_OD_h_total += OD_h
 
             for o in observers:
@@ -270,6 +273,7 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     # plt.savefig(f"images/hist_entropy_normal")
     # plt.close()
 
+    print(s_OD_h_total)
     plt.hist(s_OD_h_total)
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
