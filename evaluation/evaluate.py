@@ -243,7 +243,7 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     plt.savefig(f"images/hist_softmax_normal")
     plt.close()
 
-    plt.plot(bins[1:], l_OD_h_total[0])
+    plt.plot(logit_bins[1:], l_OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_logit_normal")
