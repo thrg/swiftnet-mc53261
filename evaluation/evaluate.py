@@ -80,6 +80,7 @@ def max_logit(logits_data):
 
 def entropy(logits_data):
     probs = torch.nn.functional.softmax(logits_data, dim=1)
+    print(probs)
     score_tensor = -(probs * torch.log(probs) / math.log(19)).sum(dim=1)
     return score_tensor
 
@@ -222,13 +223,13 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             #
             # score = max_logit(logits.data).cpu().numpy()
             # score = score[batch['original_labels'] != 2]
-            # OD_h, _ = np.histogram(score, bins)
+            # OD_h, _ = np.histogram(score, logit_bins)
             # l_OD_h_total += OD_h
 
-            print(logits.data)
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, logit_bins)
+            print(score)
+            OD_h, _ = np.histogram(score, bins)
             print(OD_h)
             e_OD_h_total += OD_h
 
