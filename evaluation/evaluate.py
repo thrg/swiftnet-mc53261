@@ -199,12 +199,12 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
 
     bins = np.linspace(0, 1, 21)
     logit_bins = np.linspace(-100, 100, 21)
-    # s_OD_h_total = np.zeros((1, 19))
-    # l_OD_h_total = np.zeros((1, 19))
-    # e_OD_h_total = np.zeros((1, 19))
-    s_OD_h_total = np.zeros(20)
-    l_OD_h_total = np.zeros(20)
-    e_OD_h_total = np.zeros(20)
+    s_OD_h_total = np.zeros((1, 19))
+    l_OD_h_total = np.zeros((1, 19))
+    e_OD_h_total = np.zeros((1, 19))
+    # s_OD_h_total = np.zeros(20)
+    # l_OD_h_total = np.zeros(20)
+    # e_OD_h_total = np.zeros(20)
 
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
@@ -219,6 +219,8 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             score = score[batch['original_labels'] != 2]
             OD_h, _ = np.histogram(score, bins)
             s_OD_h_total += OD_h
+            print(OD_h)
+            print(s_OD_h_total)
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
