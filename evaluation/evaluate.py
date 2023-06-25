@@ -237,19 +237,19 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
         pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
     model.train()
 
-    plt.plot(20, s_OD_h_total[0])
+    plt.plot(bins[1:], s_OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_softmax_normal")
     plt.close()
 
-    plt.plot(20, l_OD_h_total[0])
+    plt.plot(bins[1:], l_OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_logit_normal")
     plt.close()
 
-    plt.plot(20, e_OD_h_total[0])
+    plt.plot(bins[1:], e_OD_h_total[0])
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_entropy_normal")
