@@ -197,8 +197,8 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
 
-    bins = np.linspace(0, 1, 21)
-    logit_bins = np.linspace(-100, 100, 21)
+    bins = np.linspace(0, 1, 20)
+    logit_bins = np.linspace(-100, 100, 20)
     s_OD_h_total = np.zeros((1, 19))
     l_OD_h_total = np.zeros((1, 19))
     e_OD_h_total = np.zeros((1, 19))
