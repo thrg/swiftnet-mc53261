@@ -216,21 +216,19 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
 
-            # score = max_softmax(logits.data).cpu().numpy()
-            # score = score[batch['original_labels'] != 2]
-            # OD_h, _ = np.histogram(score, bins)
-            # s_OD_h_total += OD_h
-            #
-            # score = max_logit(logits.data).cpu().numpy()
-            # score = score[batch['original_labels'] != 2]
-            # OD_h, _ = np.histogram(score, logit_bins)
-            # l_OD_h_total += OD_h
+            score = max_softmax(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            OD_h, _ = np.histogram(score, bins)
+            s_OD_h_total += OD_h
+
+            score = max_logit(logits.data).cpu().numpy()
+            score = score[batch['original_labels'] != 2]
+            OD_h, _ = np.histogram(score, logit_bins)
+            l_OD_h_total += OD_h
 
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            print(score)
             OD_h, _ = np.histogram(score, bins)
-            print(OD_h)
             e_OD_h_total += OD_h
 
             # score = max_softmax(logits.data).cpu().numpy()
@@ -255,19 +253,19 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
         pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
     model.train()
 
-    # print(s_OD_h_total[0])
-    # plt.plot(bins[1:], s_OD_h_total[0])
-    # plt.xlabel('Vrijednost anomalije piksela')
-    # plt.ylabel('Broj piksela')
-    # plt.savefig(f"images/hist_softmax_normal")
-    # plt.close()
-    #
-    # print(l_OD_h_total[0])
-    # plt.plot(logit_bins[1:], l_OD_h_total[0])
-    # plt.xlabel('Vrijednost anomalije piksela')
-    # plt.ylabel('Broj piksela')
-    # plt.savefig(f"images/hist_logit_normal")
-    # plt.close()
+    print(s_OD_h_total[0])
+    plt.plot(bins[1:], s_OD_h_total[0])
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_softmax_normal")
+    plt.close()
+
+    print(l_OD_h_total[0])
+    plt.plot(logit_bins[1:], l_OD_h_total[0])
+    plt.xlabel('Vrijednost anomalije piksela')
+    plt.ylabel('Broj piksela')
+    plt.savefig(f"images/hist_logit_normal")
+    plt.close()
 
     print(e_OD_h_total[0])
     plt.plot(bins[1:], e_OD_h_total[0])
