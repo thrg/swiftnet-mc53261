@@ -80,7 +80,6 @@ def max_logit(logits_data):
 
 def entropy(logits_data):
     probs = torch.nn.functional.softmax(logits_data, dim=1)
-    print(probs)
     score_tensor = -(probs * torch.log(probs) / math.log(19)).sum(dim=1)
     return score_tensor
 
