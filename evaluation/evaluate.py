@@ -197,14 +197,14 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
     managers = [torch.no_grad()] + list(observers)
 
-    bins = np.linspace(0, 1, 20)
-    logit_bins = np.linspace(-100, 100, 20)
-    s_OD_h_total = np.zeros((1, 19))
-    l_OD_h_total = np.zeros((1, 19))
-    e_OD_h_total = np.zeros((1, 19))
-    # s_OD_h_total = np.zeros(20)
-    # l_OD_h_total = np.zeros(20)
-    # e_OD_h_total = np.zeros(20)
+    # bins = np.linspace(0, 1, 20)
+    # logit_bins = np.linspace(-100, 100, 20)
+    # s_OD_h_total = np.zeros((1, 19))
+    # l_OD_h_total = np.zeros((1, 19))
+    # e_OD_h_total = np.zeros((1, 19))
+    s_OD_h_total = np.zeros(20)
+    l_OD_h_total = np.zeros(20)
+    e_OD_h_total = np.zeros(20)
 
     with contextlib.ExitStack() as stack:
         for ctx_mgr in managers:
@@ -215,19 +215,34 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
             pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
 
+            # score = max_softmax(logits.data).cpu().numpy()
+            # score = score[batch['original_labels'] != 2]
+            # OD_h, _ = np.histogram(score, bins)
+            # s_OD_h_total += OD_h
+            #
+            # score = max_logit(logits.data).cpu().numpy()
+            # score = score[batch['original_labels'] != 2]
+            # OD_h, _ = np.histogram(score, bins)
+            # l_OD_h_total += OD_h
+            #
+            # score = entropy(logits.data).cpu().numpy()
+            # score = score[batch['original_labels'] != 2]
+            # OD_h, _ = np.histogram(score, logit_bins)
+            # e_OD_h_total += OD_h
+
             score = max_softmax(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, bins)
+            OD_h, _ = np.histogram(score, 20)
             s_OD_h_total += OD_h
 
             score = max_logit(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, bins)
+            OD_h, _ = np.histogram(score, 20)
             l_OD_h_total += OD_h
 
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
-            OD_h, _ = np.histogram(score, logit_bins)
+            OD_h, _ = np.histogram(score, 20)
             e_OD_h_total += OD_h
 
             for o in observers:
@@ -237,19 +252,37 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
         pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
     model.train()
 
-    plt.plot(bins[1:], s_OD_h_total[0])
+    # plt.hist(bins[1:], s_OD_h_total[0])
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_softmax_normal")
+    # plt.close()
+    #
+    # plt.hist(logit_bins[1:], l_OD_h_total[0])
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_logit_normal")
+    # plt.close()
+    #
+    # plt.hist(bins[1:], e_OD_h_total[0])
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_entropy_normal")
+    # plt.close()
+
+    plt.hist(s_OD_h_total)
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_softmax_normal")
     plt.close()
 
-    plt.plot(logit_bins[1:], l_OD_h_total[0])
+    plt.hist(l_OD_h_total)
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_logit_normal")
     plt.close()
 
-    plt.plot(bins[1:], e_OD_h_total[0])
+    plt.hist(e_OD_h_total)
     plt.xlabel('Vrijednost anomalije piksela')
     plt.ylabel('Broj piksela')
     plt.savefig(f"images/hist_entropy_normal")
