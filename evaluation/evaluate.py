@@ -225,6 +225,7 @@ def evaluate_semseg(model, data_loader, class_info, observers=()):
             # OD_h, _ = np.histogram(score, bins)
             # l_OD_h_total += OD_h
 
+            print(logits.data)
             score = entropy(logits.data).cpu().numpy()
             score = score[batch['original_labels'] != 2]
             OD_h, _ = np.histogram(score, logit_bins)
