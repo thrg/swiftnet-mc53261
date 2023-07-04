@@ -128,9 +128,10 @@ def evaluate_anomaly(model, data_loader):
             print_score[print_score < 0] = 0
             print_score[gt == 2] = 0
             print_score = np.squeeze(print_score)
+            print_score = (print_score * 255).astype(np.uint8)
             print(print_score.shape)
             data = im.fromarray(print_score)
-            data.save(f'images/image_{step}_{batch}.png')
+            data.save(f'images/image_{step}.png')
             print(print_score)
             # logit_scores.extend(score.tolist())
             # if 0 in new_gt and 1 in new_gt:
