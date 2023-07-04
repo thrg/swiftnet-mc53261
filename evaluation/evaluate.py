@@ -75,6 +75,8 @@ def max_softmax(logits_data):
 
 
 def max_logit(logits_data):
+    print(logits_data)
+    print(logits_data.shape)
     score_tensor = -torch.max(logits_data, dim=1).values
     return score_tensor
 
@@ -104,7 +106,6 @@ def evaluate_anomaly(model, data_loader):
             stack.enter_context(ctx_mgr)
         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
             gt = batch['original_labels'].numpy().astype(np.uint32)
-            print(gt)
             new_gt = gt[gt != 2]
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
 
