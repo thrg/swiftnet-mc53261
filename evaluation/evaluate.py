@@ -123,7 +123,8 @@ def evaluate_anomaly(model, data_loader):
 
             score = max_logit(logits.data).cpu().numpy()
             print(score)
-            score = score[gt != 2]
+            print_score = score > 0
+            print(print_score)
             # logit_scores.extend(score.tolist())
             # if 0 in new_gt and 1 in new_gt:
             #     logit_ap.append(average_precision_score(new_gt, score))
