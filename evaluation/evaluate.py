@@ -106,92 +106,93 @@ def evaluate_anomaly(model, data_loader):
             new_gt = gt[gt != 2]
             logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
 
-            score = max_softmax(logits.data).cpu().numpy()
-            score = score[gt != 2]
-            softmax_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                softmax_ap.append(average_precision_score(new_gt, score))
-                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
-                roc_display.plot()
-                plt.savefig(f"images/auroc_softmax_{step}")
-                plt.close()
-                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
-                ap_display.plot()
-                plt.savefig(f"images/ap_softmax_{step}")
-                plt.close()
-                softmax_auroc.append(roc_auc_score(new_gt, score))
+            # score = max_softmax(logits.data).cpu().numpy()
+            # score = score[gt != 2]
+            # softmax_scores.extend(score.tolist())
+            # if 0 in new_gt and 1 in new_gt:
+            #     softmax_ap.append(average_precision_score(new_gt, score))
+            #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+            #     roc_display.plot()
+            #     plt.savefig(f"images/auroc_softmax_{step}")
+            #     plt.close()
+            #     ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+            #     ap_display.plot()
+            #     plt.savefig(f"images/ap_softmax_{step}")
+            #     plt.close()
+            #     softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
+            print(score)
             score = score[gt != 2]
-            logit_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                logit_ap.append(average_precision_score(new_gt, score))
-                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
-                roc_display.plot()
-                plt.savefig(f"images/auroc_logit_{step}")
-                plt.close()
-                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
-                ap_display.plot()
-                plt.savefig(f"images/ap_logit_{step}")
-                plt.close()
-                logit_auroc.append(roc_auc_score(new_gt, score))
+            # logit_scores.extend(score.tolist())
+            # if 0 in new_gt and 1 in new_gt:
+            #     logit_ap.append(average_precision_score(new_gt, score))
+            #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+            #     roc_display.plot()
+            #     plt.savefig(f"images/auroc_logit_{step}")
+            #     plt.close()
+            #     ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+            #     ap_display.plot()
+            #     plt.savefig(f"images/ap_logit_{step}")
+            #     plt.close()
+            #     logit_auroc.append(roc_auc_score(new_gt, score))
 
-            score = entropy(logits.data).cpu().numpy()
-            score = score[gt != 2]
-            entropy_scores.extend(score.tolist())
-            if 0 in new_gt and 1 in new_gt:
-                entropy_ap.append(average_precision_score(new_gt, score))
-                roc_display = RocCurveDisplay.from_predictions(new_gt, score)
-                roc_display.plot()
-                plt.savefig(f"images/auroc_entropy_{step}")
-                plt.close()
-                ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
-                ap_display.plot()
-                plt.savefig(f"images/ap_entropy_{step}")
-                plt.close()
-                entropy_auroc.append(roc_auc_score(new_gt, score))
+            # score = entropy(logits.data).cpu().numpy()
+            # score = score[gt != 2]
+            # entropy_scores.extend(score.tolist())
+            # if 0 in new_gt and 1 in new_gt:
+            #     entropy_ap.append(average_precision_score(new_gt, score))
+            #     roc_display = RocCurveDisplay.from_predictions(new_gt, score)
+            #     roc_display.plot()
+            #     plt.savefig(f"images/auroc_entropy_{step}")
+            #     plt.close()
+            #     ap_display = PrecisionRecallDisplay.from_predictions(new_gt, score)
+            #     ap_display.plot()
+            #     plt.savefig(f"images/ap_entropy_{step}")
+            #     plt.close()
+            #     entropy_auroc.append(roc_auc_score(new_gt, score))
 
         print('')
     model.train()
 
-    softmax_scores = np.array(softmax_scores)
-    logit_scores = np.array(logit_scores)
-    entropy_scores = np.array(entropy_scores)
+    # softmax_scores = np.array(softmax_scores)
+    # logit_scores = np.array(logit_scores)
+    # entropy_scores = np.array(entropy_scores)
+    #
+    # plt.hist(softmax_scores)
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_softmax_anomaly")
+    # plt.close()
+    #
+    # plt.hist(logit_scores)
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_logit_anomaly")
+    # plt.close()
+    #
+    # plt.hist(entropy_scores)
+    # plt.xlabel('Vrijednost anomalije piksela')
+    # plt.ylabel('Broj piksela')
+    # plt.savefig(f"images/hist_entropy_anomaly")
+    # plt.close()
+    #
+    # softmax_ap = np.array(softmax_ap)
+    # softmax_auroc = np.array(softmax_auroc)
+    # logit_ap = np.array(logit_ap)
+    # logit_auroc = np.array(logit_auroc)
+    # entropy_ap = np.array(entropy_ap)
+    # entropy_auroc = np.array(entropy_auroc)
+    #
+    # softmax_mean_ap = np.mean(softmax_ap)
+    # softmax_mean_auroc = np.mean(softmax_auroc)
+    # logit_mean_ap = np.mean(logit_ap)
+    # logit_mean_auroc = np.mean(logit_auroc)
+    # entropy_mean_ap = np.mean(entropy_ap)
+    # entropy_mean_auroc = np.mean(entropy_auroc)
 
-    plt.hist(softmax_scores)
-    plt.xlabel('Vrijednost anomalije piksela')
-    plt.ylabel('Broj piksela')
-    plt.savefig(f"images/hist_softmax_anomaly")
-    plt.close()
-
-    plt.hist(logit_scores)
-    plt.xlabel('Vrijednost anomalije piksela')
-    plt.ylabel('Broj piksela')
-    plt.savefig(f"images/hist_logit_anomaly")
-    plt.close()
-
-    plt.hist(entropy_scores)
-    plt.xlabel('Vrijednost anomalije piksela')
-    plt.ylabel('Broj piksela')
-    plt.savefig(f"images/hist_entropy_anomaly")
-    plt.close()
-
-    softmax_ap = np.array(softmax_ap)
-    softmax_auroc = np.array(softmax_auroc)
-    logit_ap = np.array(logit_ap)
-    logit_auroc = np.array(logit_auroc)
-    entropy_ap = np.array(entropy_ap)
-    entropy_auroc = np.array(entropy_auroc)
-
-    softmax_mean_ap = np.mean(softmax_ap)
-    softmax_mean_auroc = np.mean(softmax_auroc)
-    logit_mean_ap = np.mean(logit_ap)
-    logit_mean_auroc = np.mean(logit_auroc)
-    entropy_mean_ap = np.mean(entropy_ap)
-    entropy_mean_auroc = np.mean(entropy_auroc)
-
-    return softmax_mean_ap, softmax_mean_auroc, logit_mean_ap, logit_mean_auroc, entropy_mean_ap, entropy_mean_auroc
-
+    # return softmax_mean_ap, softmax_mean_auroc, logit_mean_ap, logit_mean_auroc, entropy_mean_ap, entropy_mean_auroc
+    return 0,0,0,0,0,0
 
 def evaluate_semseg(model, data_loader, class_info, observers=()):
     model.eval()
