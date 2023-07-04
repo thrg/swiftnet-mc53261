@@ -78,6 +78,7 @@ def max_logit(logits_data):
     print(logits_data)
     print(logits_data.shape)
     score_tensor = -torch.max(logits_data, dim=1).values
+    print(score_tensor.shape)
     return score_tensor
 
 
