@@ -125,7 +125,10 @@ def evaluate_anomaly(model, data_loader):
 
             score = max_logit(logits.data).cpu().numpy()
             print(score.shape)
-            print_score = score > 0
+            print_score = score
+            print_score[print_score > 0] = 1
+            print_score[print_score < 0] = 0
+            print_score[gt == 2] = 0
             data = im.fromarray(print_score)
             data.save(f'images/image_{step}_{batch}.png')
             print(print_score)
