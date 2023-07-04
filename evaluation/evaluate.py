@@ -75,8 +75,6 @@ def max_softmax(logits_data):
 
 
 def max_logit(logits_data):
-    print(logits_data)
-    print(logits_data.shape)
     score_tensor = -torch.max(logits_data, dim=1).values
     print(score_tensor.shape)
     return score_tensor
@@ -126,7 +124,7 @@ def evaluate_anomaly(model, data_loader):
             #     softmax_auroc.append(roc_auc_score(new_gt, score))
 
             score = max_logit(logits.data).cpu().numpy()
-            print(score)
+            print(score.shape)
             print_score = score > 0
             data = im.fromarray(print_score)
             data.save(f'images/image_{step}_{batch}.png')
