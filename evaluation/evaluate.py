@@ -5,6 +5,7 @@ import torch
 from tqdm import tqdm
 from time import perf_counter
 from sklearn.metrics import average_precision_score, roc_auc_score, RocCurveDisplay, PrecisionRecallDisplay
+from PIL import Image as im
 import math
 import matplotlib.pyplot as plt
 
@@ -124,7 +125,8 @@ def evaluate_anomaly(model, data_loader):
             score = max_logit(logits.data).cpu().numpy()
             print(score)
             print_score = score > 0
-            print_score = print_score.long()
+            data = im.fromarray(print_score)
+            data.save(f'images/image_{step}_{batch}.png')
             print(print_score)
             # logit_scores.extend(score.tolist())
             # if 0 in new_gt and 1 in new_gt:
