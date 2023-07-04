@@ -127,6 +127,7 @@ def evaluate_anomaly(model, data_loader):
             print_score[print_score > 0] = 1
             print_score[print_score < 0] = 0
             print_score[gt == 2] = 0
+            print_score = np.squeeze(print_score)
             print(print_score.shape)
             data = im.fromarray(print_score)
             data.save(f'images/image_{step}_{batch}.png')
